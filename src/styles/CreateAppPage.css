@@ -1,0 +1,113 @@
+@property --create-beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.create-app-page {
+  width: 100%;
+  padding-inline: 50px;
+  box-sizing: border-box;
+}
+
+.create-app-page-header {
+  margin-bottom: 26px;
+}
+
+.create-app-page-header > .ant-btn {
+  margin: 0 0 12px -12px;
+}
+
+.create-app-page-header .ant-typography {
+  margin: 0;
+}
+
+.create-app-page-header .ant-typography-secondary {
+  display: block;
+  margin-top: 6px;
+}
+
+.create-app-card-shell {
+  position: relative;
+  width: min(820px, 80%);
+  margin-inline: auto;
+  border-radius: 14px;
+}
+
+.create-app-card-shell--loading::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -3px;
+  padding: 3px;
+  border-radius: 17px;
+  pointer-events: none;
+
+  background: conic-gradient(
+    from var(--create-beam-angle),
+    transparent 0deg,
+    transparent 240deg,
+    var(--create-primary) 285deg,
+    var(--create-error) 325deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  animation: create-app-beam 1.5s linear infinite;
+}
+
+@keyframes create-app-beam {
+  to {
+    --create-beam-angle: 360deg;
+  }
+}
+
+.create-app-status {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 16px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--create-primary);
+  background: var(--create-surface);
+  font-size: 12px;
+}
+
+.create-app-card {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.create-app-alert {
+  margin-bottom: 16px;
+}
+
+.app-form-section {
+  margin-bottom: 16px;
+  padding: 16px 18px 2px;
+  border: 1px solid var(--create-border);
+  border-radius: 12px;
+  background: var(--create-soft-bg);
+}
+
+.app-form-section .ant-typography {
+  margin: 0 0 14px;
+}
+
+.app-form-section .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.create-app-actions {
+  margin-top: 4px;
+}

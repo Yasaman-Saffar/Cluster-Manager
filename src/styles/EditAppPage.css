@@ -1,0 +1,113 @@
+@property --edit-beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.edit-app-page {
+  width: 100%;
+  padding-inline: 50px;
+  box-sizing: border-box;
+}
+
+.edit-app-page-header {
+  margin-bottom: 26px;
+}
+
+.edit-app-page-header > .ant-btn {
+  margin: 0 0 12px -12px;
+}
+
+.edit-app-page-header .ant-typography {
+  margin: 0;
+}
+
+.edit-app-page-header .ant-typography-secondary {
+  display: block;
+  margin-top: 6px;
+}
+
+.edit-app-card-shell {
+  position: relative;
+  width: min(820px, 80%);
+  margin-inline: auto;
+  border-radius: 14px;
+}
+
+.edit-app-card-shell--loading::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -3px;
+  padding: 3px;
+  border-radius: 17px;
+  pointer-events: none;
+
+  background: conic-gradient(
+    from var(--edit-beam-angle),
+    transparent 0deg,
+    transparent 240deg,
+    var(--edit-primary) 285deg,
+    var(--edit-error) 325deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  animation: edit-app-beam 1.5s linear infinite;
+}
+
+@keyframes edit-app-beam {
+  to {
+    --edit-beam-angle: 360deg;
+  }
+}
+
+.edit-app-status {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 16px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--edit-primary);
+  background: var(--edit-surface);
+  font-size: 12px;
+}
+
+.edit-app-card {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.edit-app-alert {
+  margin-bottom: 16px;
+}
+
+.edit-form-section {
+  margin-bottom: 16px;
+  padding: 16px 18px 2px;
+  border: 1px solid var(--edit-border);
+  border-radius: 12px;
+  background: var(--edit-soft-bg);
+}
+
+.edit-form-section .ant-typography {
+  margin: 0 0 14px;
+}
+
+.edit-form-section .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.edit-app-actions {
+  margin-top: 4px;
+}

@@ -1,0 +1,42 @@
+@property --modal-beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.add-cluster-modal-shell {
+  position: relative;
+  border-radius: 14px;
+}
+
+.add-cluster-modal-shell > .ant-modal-content {
+  position: relative;
+  z-index: 1;
+}
+
+.add-cluster-modal-shell--loading::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -3px;
+  padding: 3px;
+  border-radius: 17px;
+  pointer-events: none;
+
+  background: conic-gradient(
+    from var(--modal-beam-angle),
+    transparent 0deg,
+    transparent 240deg,
+    var(--modal-beam-primary) 285deg,
+    var(--modal-beam-error) 325deg,
+    transparent 360deg
+  );
+
+  animation: modal-border-beam 1.4s linear infinite;
+}
+
+@keyframes modal-border-beam {
+  to {
+    --modal-beam-angle: 360deg;
+  }
+}

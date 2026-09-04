@@ -1,0 +1,61 @@
+.connect-cluster-page {
+  width: 100%;
+  padding-inline: 50px;
+  box-sizing: border-box;
+}
+
+.connect-cluster-header {
+  margin-bottom: 26px;
+}
+
+.connect-cluster-header .ant-typography {
+  margin: 0;
+}
+
+.connect-cluster-header .ant-typography-secondary {
+  display: block;
+  margin-top: 6px;
+}
+
+.connect-card-shell {
+  position: relative;
+  width: min(650px, 100%);
+  border-radius: 14px;
+}
+
+.connect-card-shell--loading::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -2px;
+  padding: 2px;
+  pointer-events: none;
+  border-radius: 16px;
+
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    transparent 245deg,
+    var(--connect-primary) 290deg,
+    var(--connect-error) 325deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  animation: connect-border-beam 1.6s linear infinite;
+}
+
+@keyframes connect-border-beam {
+  to {
+    --beam-angle: 360deg;
+  }
+}

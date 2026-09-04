@@ -1,0 +1,200 @@
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.cluster-card-shell {
+  position: relative;
+  /* width: 100%; */
+  margin-inline: 50px;
+  border-radius: 14px;
+}
+
+.cluster-card-shell--loading::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -2px;
+  padding: 2px;
+  pointer-events: none;
+  border-radius: 16px;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    transparent 245deg,
+    var(--beam-primary) 290deg,
+    var(--beam-error) 325deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
+  animation: rotate-border-beam 1.6s linear infinite;
+}
+
+@keyframes rotate-border-beam {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+.cluster-operation-status {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 16px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--beam-primary);
+  background: var(--beam-surface);
+  font-size: 12px;
+}
+
+.cluster-card {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.namespace-card-title.ant-typography {
+  margin: 0;
+}
+
+.namespace-layout {
+  min-height: 360px;
+}
+
+.namespace-layout--left {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 22px;
+}
+
+.namespace-layout--left .namespace-tabs-sidebar {
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 10px;
+  border-inline-end: 1px solid var(--workspace-border);
+}
+
+.namespace-layout--left .namespace-add-button {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+
+  align-self: flex-end;
+
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.namespace-layout--left .namespace-tabs {
+  width: 100%;
+}
+
+.namespace-layout--left .namespace-tabs .ant-tabs-nav {
+  padding: 0;
+  width: 100%;
+}
+
+.namespace-layout--left .namespace-tabs .ant-tabs-tab {
+  width: 100%;
+}
+
+/* Tabs are only used as navigation */
+
+.namespace-tab-name {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.namespace-tabs .ant-tabs-content-holder {
+  display: none;
+}
+
+.namespace-tabs .ant-tabs-nav {
+  margin-bottom: 0;
+}
+
+.namespace-tabs .ant-tabs-nav-wrap {
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.namespace-tabs .ant-tabs-nav-list {
+  min-width: max-content;
+}
+
+.namespace-add-button {
+  flex-shrink: 0;
+}
+
+.namespace-content {
+  min-width: 0;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.namespace-empty {
+  min-height: 280px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.namespace-layout--left .namespace-content {
+  padding-top: 0;
+}
+
+.namespace-content-header {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.namespace-content-header .ant-typography {
+  margin: 0;
+}
+
+.apps-error {
+  margin-bottom: 14px;
+}
+
+.app-list {
+  min-height: 0;
+  max-height: 270px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.app-list .ant-btn-link {
+  padding-inline: 0;
+}
+
+@media (max-width: 760px) {
+  .namespace-layout--left {
+    grid-template-columns: 170px minmax(0, 1fr);
+  }
+
+  .namespace-content-header {
+    flex-direction: column;
+  }
+}

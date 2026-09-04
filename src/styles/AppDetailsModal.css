@@ -1,0 +1,41 @@
+.app-details-modal .ant-modal-body {
+  padding-top: 8px;
+}
+
+.app-details-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 9px;
+  font-size: 17px;
+}
+
+.app-image-section {
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.app-image-section code {
+  width: fit-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.app-details-section + .app-details-section {
+  margin-top: 24px;
+}
+
+.app-details-section .ant-typography {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.app-details-section .ant-descriptions-item-label {
+  width: 135px;
+}

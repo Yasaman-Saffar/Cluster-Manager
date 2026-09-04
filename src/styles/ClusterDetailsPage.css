@@ -1,0 +1,18 @@
+.cluster-details-page {
+  width: 100%;
+}
+
+.cluster-details-header {
+  margin-bottom: 26px;
+  margin-left: 50px;
+}
+
+.cluster-details-title.ant-typography {
+  margin: 0;
+}
+
+.cluster-details-address {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+}
