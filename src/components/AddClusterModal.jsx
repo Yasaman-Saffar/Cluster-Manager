@@ -1,7 +1,7 @@
 import { Alert, App as AntApp, Form, Input, Modal, theme } from "antd";
 import { useState } from "react";
+import { createCluster } from "../api/clusters";
 
-import { storeCluster } from "../utils/clusterStorage";
 import "../styles/AddClusterModal.css";
 
 function AddClusterModal({ open, onCancel, onCreated }) {
@@ -20,24 +20,15 @@ function AddClusterModal({ open, onCancel, onCreated }) {
     setError("");
 
     try {
-      // شبیه‌سازی زمان درخواست POST
-      await new Promise((resolve) => {
-        setTimeout(resolve, 800);
-      });
-
-      const newCluster = {
-        id: Date.now(),
+      const newCluster = await createCluster({
         name: values.name,
         address: values.address,
-        namespace_count: 0,
-        namespaces: [],
-      };
-
-      // Token عمداً در localStorage ذخیره نمی‌شود.
-      storeCluster(newCluster);
+        token: values.token,
+      });
 
       form.resetFields();
       message.success("Cluster added successfully.");
+
       onCreated(newCluster);
     } catch (requestError) {
       setError(requestError.message || "Could not add the cluster.");
@@ -61,6 +52,7 @@ function AddClusterModal({ open, onCancel, onCreated }) {
       title="Add New Cluster"
       okText="Add Cluster"
       cancelText="Cancel"
+      confirmLoading={saving}
       closable={!saving}
       maskClosable={!saving}
       okButtonProps={{ disabled: saving }}

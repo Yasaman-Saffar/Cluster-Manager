@@ -1,8 +1,9 @@
-import { Typography } from "antd";
+import { Alert, Spin, Typography } from "antd";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import { getClusters } from "../api/clusters";
 import ClusterCard from "../components/ClusterCard";
-import { mockClusters } from "../mocks/clusters";
 import "../styles/ClusterDetailsPage.css";
 
 const { Title, Text } = Typography;
@@ -10,7 +11,51 @@ const { Title, Text } = Typography;
 function ClusterDetailsPage() {
   const { clusterId } = useParams();
 
-  const cluster = mockClusters.find((item) => String(item.id) === clusterId);
+  const [cluster, setCluster] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setLoading(true);
+    setError("");
+
+    getClusters()
+      .then((data) => {
+        if (cancelled) return;
+
+        const clusterList = Array.isArray(data) ? data : (data.results ?? []);
+
+        const foundCluster = clusterList.find(
+          (item) => String(item.id) === String(clusterId),
+        );
+
+        setCluster(foundCluster ?? null);
+      })
+      .catch((requestError) => {
+        if (!cancelled) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clusterId]);
+
+  if (loading) {
+    return <Spin />;
+  }
+
+  if (error) {
+    return <Alert type="error" message={error} showIcon />;
+  }
 
   if (!cluster) {
     return <p>Cluster not found.</p>;

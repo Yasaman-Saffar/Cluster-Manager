@@ -60,18 +60,22 @@ function ClusterCard({ cluster }) {
     await createNamespace(name);
   };
 
-  const handleConfirmNamespaceDelete = async () => {
-    const namespace = namespaceToDelete;
+  const handleConfirmAppDelete = async () => {
+    if (!appToDelete) return;
 
-    setNamespaceToDelete(null);
-    await deleteNamespace(namespace);
+    const app = appToDelete;
+    setAppToDelete(null);
+
+    await deleteApp(app);
   };
 
-  const handleConfirmAppDelete = async () => {
-    const app = appToDelete;
+  const handleConfirmNamespaceDelete = async () => {
+    if (!namespaceToDelete) return;
 
-    setAppToDelete(null);
-    await deleteApp(app);
+    const namespace = namespaceToDelete;
+    setNamespaceToDelete(null);
+
+    await deleteNamespace(namespace);
   };
 
   return (
@@ -123,22 +127,24 @@ function ClusterCard({ cluster }) {
         </Card>
       </div>
 
-      <AppDetailsModal
-        app={selectedApp}
-        open={selectedApp !== null}
-        statusColor={getAppStatusColor(selectedApp?.status)}
-        onClose={() => setSelectedApp(null)}
-        onEdit={() => {
-          const appId = selectedApp.id;
+      {selectedApp && (
+        <AppDetailsModal
+          app={selectedApp}
+          open
+          statusColor={getAppStatusColor(selectedApp.status)}
+          onClose={() => setSelectedApp(null)}
+          onEdit={() => {
+            const appId = selectedApp.id;
 
-          setSelectedApp(null);
-          navigate(`/apps/${appId}/edit`);
-        }}
-        onDelete={() => {
-          setAppToDelete(selectedApp);
-          setSelectedApp(null);
-        }}
-      />
+            setSelectedApp(null);
+            navigate(`/apps/${appId}/edit`);
+          }}
+          onDelete={() => {
+            setAppToDelete(selectedApp);
+            setSelectedApp(null);
+          }}
+        />
+      )}
 
       <CreateNamespaceModal
         open={createNamespaceOpen}

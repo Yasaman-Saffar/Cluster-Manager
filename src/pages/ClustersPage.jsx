@@ -3,12 +3,20 @@ import {
   ArrowRightOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Empty, List, Space, Tag, Typography, theme } from "antd";
-import { useState } from "react";
+import {
+  Alert,
+  Button,
+  Card,
+  Empty,
+  List,
+  Space,
+  Tag,
+  Typography,
+  theme,
+} from "antd";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-import { mockClusters } from "../mocks/clusters";
-import { getStoredClusters } from "../utils/clusterStorage";
+import { getClusters } from "../api/clusters";
 import AddClusterModal from "../components/AddClusterModal";
 import "../styles/ClustersPage.css";
 
@@ -27,10 +35,9 @@ function ClusterPage() {
     },
   } = theme.useToken();
 
-  const [clusters, setClusters] = useState(() => [
-    ...mockClusters,
-    ...getStoredClusters(),
-  ]);
+  const [clusters, setClusters] = useState([]);
+  const [clustersLoading, setClustersLoading] = useState(true);
+  const [clusterError, setClusterError] = useState("");
 
   const [addClusterOpen, setAddClusterOpen] = useState(false);
 
@@ -39,6 +46,34 @@ function ClusterPage() {
 
     setAddClusterOpen(false);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setClustersLoading(true);
+    setClusterError("");
+
+    getClusters()
+      .then((data) => {
+        if (!cancelled) {
+          setClusters(Array.isArray(data) ? data : (data.results ?? []));
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setClusterError(error.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setClustersLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <main
@@ -79,8 +114,11 @@ function ClusterPage() {
         </Space>
       </section>
 
+      {clusterError && <Alert type="error" message={clusterError} showIcon />}
+
       <List
         className="cluster-list"
+        loading={clustersLoading}
         grid={{
           gutter: 16,
           xs: 1,

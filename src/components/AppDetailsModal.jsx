@@ -21,13 +21,12 @@ function AppDetailsModal({
   onDelete,
 }) {
   const {
-    token: { colorPrimary, colorBorderSecondary, colorFillQuaternary },
+    token: { colorBorderSecondary, colorFillQuaternary },
   } = theme.useToken();
 
   if (!app) {
     return null;
   }
-
   return (
     <Modal
       centered

@@ -20,13 +20,6 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { createApp } from "../api/apps";
 import "../styles/CreateAppPage.css";
 
-const USE_MOCK_API = true;
-
-const simulateRequest = () =>
-  new Promise((resolve) => {
-    setTimeout(resolve, 3000);
-  });
-
 const { Title, Text } = Typography;
 
 function CreateAppPage() {
@@ -60,14 +53,10 @@ function CreateAppPage() {
     setError("");
 
     try {
-      if (USE_MOCK_API) {
-        await simulateRequest();
-      } else {
-        await createApp({
-          ...values,
-          namespace: Number(namespaceId),
-        });
-      }
+      await createApp({
+        ...values,
+        namespace: Number(namespaceId),
+      });
 
       message.success("App created successfully.");
 
@@ -224,7 +213,7 @@ function CreateAppPage() {
             </section>
 
             <Space className="create-app-actions">
-              <Button type="primary" htmlType="submit" disabled={saving}>
+              <Button type="primary" htmlType="submit" loading={saving}>
                 Create App
               </Button>
 

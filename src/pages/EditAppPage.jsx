@@ -9,24 +9,17 @@ import {
   InputNumber,
   Row,
   Space,
+  Spin,
   Typography,
   theme,
 } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-import { mockClusters } from "../mocks/clusters";
+import { getApp, updateApp } from "../api/apps";
 import "../styles/EditAppPage.css";
 
 const { Title, Text } = Typography;
-
-const USE_MOCK_API = true;
-
-const simulateRequest = () =>
-  new Promise((resolve) => {
-    setTimeout(resolve, 3000);
-  });
 
 function EditAppPage() {
   const { appId } = useParams();
@@ -35,6 +28,9 @@ function EditAppPage() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [app, setApp] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const {
     token: {
@@ -46,17 +42,45 @@ function EditAppPage() {
     },
   } = theme.useToken();
 
-  const cluster = mockClusters.find((item) =>
-    item.namespaces?.some((namespace) =>
-      namespace.apps?.some((app) => String(app.id) === appId),
-    ),
-  );
+  useEffect(() => {
+    let cancelled = false;
 
-  const namespace = cluster?.namespaces?.find((item) =>
-    item.apps?.some((app) => String(app.id) === appId),
-  );
+    setLoading(true);
+    setLoadError("");
 
-  const app = namespace?.apps?.find((item) => String(item.id) === appId);
+    getApp(appId)
+      .then((data) => {
+        if (!cancelled) {
+          setApp(data);
+        }
+      })
+      .catch((requestError) => {
+        if (!cancelled) {
+          setLoadError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [appId]);
+
+  if (loading) {
+    return <Spin />;
+  }
+
+  if (loadError) {
+    return (
+      <main className="edit-app-page">
+        <Alert type="error" message={loadError} showIcon />
+      </main>
+    );
+  }
 
   if (!app) {
     return (
@@ -71,26 +95,13 @@ function EditAppPage() {
     setError("");
 
     try {
-      if (USE_MOCK_API) {
-        await simulateRequest();
+      await updateApp(appId, values);
 
-        console.log("Updated App:", {
-          id: app.id,
-          ...values,
-        });
-      } else {
-        /*
-         * بعد از اتصال backend:
-         *
-         * await updateApp(app.id, values);
-         */
-      }
-
-      message.success("Application updated successfully.");
+      message.success("App updated successfully.");
 
       navigate(-1);
     } catch (requestError) {
-      setError(requestError.message || "Could not update the application.");
+      setError(requestError.message || "Could not update the app.");
     } finally {
       setSaving(false);
     }
@@ -109,15 +120,7 @@ function EditAppPage() {
 
         <Title level={2}>Edit {app.name}</Title>
 
-        <Text type="secondary">
-          Update app settings
-          {namespace?.name && (
-            <>
-              {" "}
-              in namespace <strong>{namespace.name}</strong>
-            </>
-          )}
-        </Text>
+        <Text type="secondary">Update app settings</Text>
       </header>
 
       <div
@@ -135,11 +138,11 @@ function EditAppPage() {
       >
         {saving && <div className="edit-app-status">Saving changes...</div>}
 
-        <Card className="edit-app-card" title="Application Configuration">
+        <Card className="edit-app-card" title="App Configuration">
           {error && (
             <Alert
               type="error"
-              message="Could not update application"
+              message="Could not update app"
               description={error}
               showIcon
               closable
@@ -150,7 +153,7 @@ function EditAppPage() {
 
           <Form layout="vertical" initialValues={app} onFinish={handleSubmit}>
             <section className="edit-form-section">
-              <Title level={5}>Application</Title>
+              <Title level={5}>App</Title>
 
               <Form.Item
                 name="image"
@@ -215,7 +218,7 @@ function EditAppPage() {
             </section>
 
             <Space className="edit-app-actions">
-              <Button type="primary" htmlType="submit" disabled={saving}>
+              <Button type="primary" htmlType="submit" loading={saving}>
                 Save Changes
               </Button>
 

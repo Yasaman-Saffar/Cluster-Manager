@@ -1,12 +1,6 @@
 import { Modal } from "antd";
 
-function ConfirmDeleteModal({
-  open,
-  title,
-  description,
-  onCancel,
-  onConfirm,
-}) {
+function ConfirmDeleteModal({ open, title, description, onCancel, onConfirm }) {
   return (
     <Modal
       centered

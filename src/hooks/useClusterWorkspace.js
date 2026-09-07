@@ -1,30 +1,25 @@
 import { useEffect, useState } from "react";
 import { App as AntApp } from "antd";
 
-import { getApps } from "../api/apps";
+import {
+  getNamespaces,
+  createNamespace as createNamespaceRequest,
+  deleteNamespace as deleteNamespaceRequest,
+} from "../api/namespaces";
 
-const simulateRequest = () =>
-  new Promise((resolve) => {
-    setTimeout(resolve, 1500);
-  });
+import { getApps, deleteApp as deleteAppRequest } from "../api/apps";
 
 function useClusterWorkspace(cluster) {
   const { message } = AntApp.useApp();
 
-  const [namespaces, setNamespaces] = useState(
-    cluster.namespaces ?? []
-  );
+  const [namespaces, setNamespaces] = useState([]);
+  const [selectedNamespaceId, setSelectedNamespaceId] = useState("");
 
-  const [
-    selectedNamespaceId,
-    setSelectedNamespaceId,
-  ] = useState(
-    String(cluster.namespaces?.[0]?.id ?? "")
-  );
+  const [namespacesLoading, setNamespacesLoading] = useState(false);
+  const [namespacesError, setNamespacesError] = useState("");
 
   const [apps, setApps] = useState([]);
-  const [appsLoading, setAppsLoading] =
-    useState(false);
+  const [appsLoading, setAppsLoading] = useState(false);
   const [appsError, setAppsError] = useState("");
 
   const [operation, setOperation] = useState({
@@ -33,8 +28,7 @@ function useClusterWorkspace(cluster) {
   });
 
   const selectedNamespace = namespaces.find(
-    (namespace) =>
-      String(namespace.id) === selectedNamespaceId
+    (namespace) => String(namespace.id) === selectedNamespaceId,
   );
 
   const runOperation = async ({
@@ -51,10 +45,10 @@ function useClusterWorkspace(cluster) {
     try {
       await task();
       message.success(successMessage);
+      return true;
     } catch (error) {
-      message.error(
-        error.message || errorMessage
-      );
+      message.error(error.message || errorMessage);
+      return false;
     } finally {
       setOperation({
         loading: false,
@@ -63,112 +57,41 @@ function useClusterWorkspace(cluster) {
     }
   };
 
-  const createNamespace = async (name) => {
-    await runOperation({
-      label: "Creating namespace...",
-      successMessage:
-        `${name} namespace created successfully.`,
-      errorMessage: "Could not create namespace.",
+  // Getting cluster's namespaces
+  useEffect(() => {
+    let cancelled = false;
 
-      task: async () => {
-        await simulateRequest();
+    setNamespacesLoading(true);
+    setNamespacesError("");
 
-        const newNamespace = {
-          id: Date.now(),
-          name,
-          status: "ready",
-          apps: [],
-        };
+    getNamespaces(cluster.id)
+      .then((data) => {
+        if (cancelled) return;
 
-        setNamespaces((current) => [
-          ...current,
-          newNamespace,
-        ]);
+        const namespaceList = Array.isArray(data) ? data : (data.results ?? []);
 
-        setSelectedNamespaceId(
-          String(newNamespace.id)
-        );
-      },
-    });
-  };
+        setNamespaces(namespaceList);
 
-  const deleteNamespace = async (namespace) => {
-    if (!namespace) return;
-
-    await runOperation({
-      label: "Deleting namespace...",
-      successMessage:
-        `${namespace.name} namespace deleted.`,
-      errorMessage: "Could not delete namespace.",
-
-      task: async () => {
-        await simulateRequest();
-
-        const remainingNamespaces =
-          namespaces.filter(
-            (item) => item.id !== namespace.id
-          );
-
-        setNamespaces(remainingNamespaces);
-
-        if (
-          String(namespace.id) ===
-          selectedNamespaceId
-        ) {
-          setSelectedNamespaceId(
-            String(
-              remainingNamespaces[0]?.id ?? ""
-            )
-          );
+        setSelectedNamespaceId(String(namespaceList[0]?.id ?? ""));
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setNamespaces([]);
+          setNamespacesError(error.message);
         }
-      },
-    });
-  };
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setNamespacesLoading(false);
+        }
+      });
 
-  const deleteApp = async (app) => {
-    if (!app) return;
+    return () => {
+      cancelled = true;
+    };
+  }, [cluster.id]);
 
-    await runOperation({
-      label: "Deleting the app...",
-      successMessage:
-        `${app.name} deleted successfully.`,
-      errorMessage:
-        "Could not delete app.",
-
-      task: async () => {
-        await simulateRequest();
-
-        setApps((currentApps) =>
-          currentApps.filter(
-            (currentApp) =>
-              currentApp.id !== app.id
-          )
-        );
-
-        setNamespaces((currentNamespaces) =>
-          currentNamespaces.map((namespace) => {
-            if (
-              String(namespace.id) !==
-              selectedNamespaceId
-            ) {
-              return namespace;
-            }
-
-            return {
-              ...namespace,
-              apps: (
-                namespace.apps ?? []
-              ).filter(
-                (currentApp) =>
-                  currentApp.id !== app.id
-              ),
-            };
-          })
-        );
-      },
-    });
-  };
-
+  // Get selected namespace's apps
   useEffect(() => {
     if (!selectedNamespaceId) {
       setApps([]);
@@ -176,40 +99,18 @@ function useClusterWorkspace(cluster) {
       return;
     }
 
-    const currentNamespace = namespaces.find(
-      (namespace) =>
-        String(namespace.id) ===
-        selectedNamespaceId
-    );
-
-    if (!currentNamespace) {
-      setApps([]);
-      setAppsError("");
-      return;
-    }
-
-    if (Array.isArray(currentNamespace.apps)) {
-      setApps(currentNamespace.apps);
-      setAppsLoading(false);
-      setAppsError("");
-      return;
-    }
-
     let cancelled = false;
 
-    setApps([]);
     setAppsLoading(true);
     setAppsError("");
 
     getApps(selectedNamespaceId)
       .then((data) => {
-        if (!cancelled) {
-          const appList = Array.isArray(data)
-            ? data
-            : data.results ?? [];
+        if (cancelled) return;
 
-          setApps(appList);
-        }
+        const appList = Array.isArray(data) ? data : (data.results ?? []);
+
+        setApps(appList);
       })
       .catch((error) => {
         if (!cancelled) {
@@ -226,19 +127,83 @@ function useClusterWorkspace(cluster) {
     return () => {
       cancelled = true;
     };
-  }, [namespaces, selectedNamespaceId]);
+  }, [selectedNamespaceId]);
 
-  const isBusy =
-    operation.loading || appsLoading;
+  const createNamespace = async (name) => {
+    return runOperation({
+      label: "Creating namespace...",
+      successMessage: `${name} namespace created successfully.`,
+      errorMessage: "Could not create namespace.",
+
+      task: async () => {
+        const newNamespace = await createNamespaceRequest({
+          cluster: cluster.id,
+          name: name,
+        });
+
+        setNamespaces((current) => [...current, newNamespace]);
+
+        setSelectedNamespaceId(String(newNamespace.id));
+      },
+    });
+  };
+
+  const deleteNamespace = async (namespace) => {
+    if (!namespace) return false;
+
+    return runOperation({
+      label: "Deleting namespace...",
+      successMessage: `${namespace.name} namespace deleted.`,
+      errorMessage: "Could not delete namespace.",
+
+      task: async () => {
+        await deleteNamespaceRequest(namespace.id);
+
+        const remainingNamespaces = namespaces.filter(
+          (item) => item.id !== namespace.id,
+        );
+
+        setNamespaces(remainingNamespaces);
+
+        if (String(namespace.id) === selectedNamespaceId) {
+          setSelectedNamespaceId(String(remainingNamespaces[0]?.id ?? ""));
+        }
+      },
+    });
+  };
+
+  const deleteApp = async (app) => {
+    if (!app) return false;
+
+    return runOperation({
+      label: "Deleting the app...",
+      successMessage: `${app.name} deleted successfully.`,
+      errorMessage: "Could not delete app.",
+
+      task: async () => {
+        await deleteAppRequest(app.id);
+
+        setApps((currentApps) =>
+          currentApps.filter((currentApp) => currentApp.id !== app.id),
+        );
+      },
+    });
+  };
+
+  const isBusy = namespacesLoading || appsLoading || operation.loading;
 
   const loadingLabel =
     operation.label ||
-    (appsLoading
-      ? "Loading apps..."
-      : "");
+    (namespacesLoading
+      ? "Loading namespaces..."
+      : appsLoading
+        ? "Loading apps..."
+        : "");
 
   return {
     namespaces,
+    namespacesError,
+
     selectedNamespace,
     selectedNamespaceId,
     setSelectedNamespaceId,

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  namespace: cluster-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      containers:
+      - name: celery-worker
+        image: ghcr.io/yasaman-saffar/cluster-manager-backend:main
+        imagePullPolicy: Always
+        command: ["celery"]
+        args: ["-A", "core", "worker", "--loglevel=info"]
+        envFrom:
+          - configMapRef:
+              name: backend-config
+          - secretRef:
+              name: backend-secret
+        volumeMounts:                
+          - name: backup-storage
+            mountPath: /backups
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+    
+      volumes:                       
+        - name: backup-storage
+          persistentVolumeClaim:
+            claimName: backup-storage
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat
+  namespace: cluster-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-beat
+  template:
+    metadata:
+      labels:
+        app: celery-beat
+    spec:
+      containers:
+      - name: celery-beat
+        image: ghcr.io/yasaman-saffar/cluster-manager-backend:main
+        imagePullPolicy: Always
+        command: ["celery"]
+        args: ["-A", "core", "beat", "--loglevel=info"]
+        envFrom:
+          - configMapRef:
+              name: backend-config
+          - secretRef:
+              name: backend-secret
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+
