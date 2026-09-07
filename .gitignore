@@ -1,4 +1,21 @@
+# Environment files
 .env
+.env.*
+
+# Secrets
+**/k8s/*secret.yaml
+
+# Frontend-generated files
 node_modules/
 dist/
-README.md
+
+# Python-generated files
+__pycache__/
+*.pyc
+.venv/
+venv/
+db.sqlite3
+backups/
+
+# Editor and operating-system files
+.vscode/
