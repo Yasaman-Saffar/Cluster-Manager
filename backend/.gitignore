@@ -3,5 +3,8 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
+get_helm.sh
 
 /k8s/backend-secret.yaml
+/monitoring/vm-reader-credentials.yaml
+/monitoring/vm-writer-credentials.yaml

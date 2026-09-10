@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/yasaman-saffar/cluster-manager-backend:main
+          image: ghcr.io/yasaman-saffar/cluster-manager-backend:monitoring-v2
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
@@ -39,10 +39,13 @@ kind: Service
 metadata:
   name: backend
   namespace: cluster-manager
+  labels:
+    app: backend
 spec:
   type: ClusterIP
   selector:
     app: backend
   ports:
-  - port: 8000
+  - name: http
+    port: 8000
     targetPort: 8000

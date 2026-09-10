@@ -1,0 +1,19 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: backend
+  namespace: cluster-manager
+  labels:
+    monitoring: cluster-manager
+spec:
+  selector:
+    matchLabels:
+      app: backend
+
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      vm_scrape_params:
+        headers:
+          - "Host: api.saffar.osdl.ir"

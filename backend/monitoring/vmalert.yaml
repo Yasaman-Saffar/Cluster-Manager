@@ -1,0 +1,32 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: main
+  namespace: monitoring-system
+spec:
+  replicaCount: 1
+  evaluationInterval: 10s
+
+  selectAllByDefault: false
+
+  ruleSelector:
+    matchLabels:
+      alerting: main
+
+  ruleNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: monitoring-system
+
+  datasource:
+    url: http://vmsingle-main.monitoring-system.svc:8428
+
+  notifier:
+    url: http://vmalertmanager-main.monitoring-system.svc:9093
+  
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 150m
+      memory: 128Mi

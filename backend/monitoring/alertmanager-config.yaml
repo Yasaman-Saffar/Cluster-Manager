@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-config
+  namespace: monitoring-system
+type: Opaque
+stringData:
+  alertmanager.yaml: |
+    global:
+      resolve_timeout: 1m
+
+    route:
+      receiver: default
+      group_by:
+        - alertname
+      group_wait: 1s
+      group_interval: 5s
+      repeat_interval: 1m
+
+    receivers:
+      - name: default

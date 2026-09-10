@@ -1,0 +1,35 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: main
+  namespace: monitoring-system
+spec:
+  selectAllByDefault: false
+
+  serviceScrapeSelector: {}
+
+  serviceScrapeNamespaceSelector:
+    matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+          - cluster-manager
+          - monitoring-system
+
+  remoteWrite:
+    - url: http://vmauth-main.monitoring-system.svc:8427/api/v1/write
+      basicAuth:
+        username:
+          name: vm-writer-credentials
+          key: username
+        password: 
+          name: vm-writer-credentials
+          key: password
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi

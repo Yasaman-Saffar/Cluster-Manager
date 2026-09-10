@@ -1,8 +1,10 @@
 from kubernetes import client, config
 from .kubernetes_client import get_kubernetes_client
+from ..metrics import track_kubernetes_operation
 
 from resources.models import App
 
+@track_kubernetes_operation("namespace", "create")
 def create_kuber_namespace(cluster, ns_name):
 
     api_client = get_kubernetes_client(cluster)
@@ -13,18 +15,18 @@ def create_kuber_namespace(cluster, ns_name):
         )
     )
 
-    v1.create_namespace(body=namespace)
+    v1.create_namespace(body=namespace, _request_timeout=5)
 
 
-
+@track_kubernetes_operation("namespace", "delete")
 def delete_kuber_namespace(cluster, ns_name):
     api_client = get_kubernetes_client(cluster)
     v1 = client.CoreV1Api(api_client)
 
-    v1.delete_namespace(name=ns_name)
+    v1.delete_namespace(name=ns_name, _request_timeout=5,)
 
 
-
+@track_kubernetes_operation("app", "create")
 def create_app_deployment(app):
     cluster = app.namespace.cluster
     api_client = get_kubernetes_client(cluster)
@@ -75,9 +77,12 @@ def create_app_deployment(app):
 
     apps_v1.create_namespaced_deployment(
         namespace=app.namespace.name,
-        body=deployment
+        body=deployment,
+        _request_timeout=5,
     )
 
+
+@track_kubernetes_operation("app", "list")
 def get_app_status(app):
     cluster = app.namespace.cluster
     api_client = get_kubernetes_client(cluster)
@@ -85,7 +90,8 @@ def get_app_status(app):
 
     deployment = apps_v1.read_namespaced_deployment(
         name=app.name,
-        namespace=app.namespace.name
+        namespace=app.namespace.name,
+        _request_timeout=5,
     )
 
     desired_replicas = deployment.spec.replicas or 0
@@ -103,6 +109,7 @@ def get_app_status(app):
         "status": app_status
     }
 
+@track_kubernetes_operation("app", "update")
 def update_app_deployment(app, new_data):
     cluster = app.namespace.cluster
     api_client = get_kubernetes_client(cluster)
@@ -144,9 +151,11 @@ def update_app_deployment(app, new_data):
     apps_v1.patch_namespaced_deployment(
         name=app.name,
         namespace=app.namespace.name,
-        body=body
+        body=body,
+        _request_timeout=5,
     )
 
+@track_kubernetes_operation("app", "delete")
 def delete_kuber_app(app):
     cluster = app.namespace.cluster
 
@@ -154,5 +163,6 @@ def delete_kuber_app(app):
     apps_v1 = client.AppsV1Api(api_client)
     apps_v1.delete_namespaced_deployment(
         name=app.name,
-        namespace=app.namespace.name
+        namespace=app.namespace.name,
+        _request_timeout=5,
     )

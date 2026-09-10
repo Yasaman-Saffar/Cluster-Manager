@@ -6,3 +6,4 @@ db.sqlite3
 .git
 .gitignore
 k8s
+monitoring
